@@ -2,6 +2,7 @@ import express from 'express'
 import cors from 'cors'
 import bodyParser from 'body-parser'
 import pdfsRouter from '../routes/pdf.js'
+import advSearchRouter from '../routes/advSearch.js'
 import dbConection from '../database/config.js'
 import morgan from 'morgan'
 import ServerlessHttp from 'serverless-http'
@@ -13,6 +14,7 @@ export class Server {
 
     this.paths = {
       pdfs: '/api/pdfs',
+      advSearch: '/api/advSearch'
     }
 
     this.conectDB()
@@ -39,6 +41,7 @@ export class Server {
 
   routes () {
     this.app.use(this.paths.pdfs, pdfsRouter)
+    this.app.use(this.paths.advSearch, advSearchRouter)
   }
 
   async getLocalIp () {
@@ -59,12 +62,12 @@ export class Server {
     // ServerlessHttp(this.app);
     this.app.listen(this.port, () => {
       console.log(' -------------------------------------------------')
-      console.log(`|  💻 Server runing on port ${this.port}.                 |`)
+      console.log(`|  💻 Server runing on port ${this.port}.                  |`)
       console.log(`|  You can watch here: http://localhost:${this.port}/      |`)
-      console.log(`|  ${this.paths.pdfs}                                     |`)
+      console.log(`|  ${this.paths.pdfs}                                       |`)
+      console.log(`|  ${this.paths.advSearch}                                  |`)
       console.log(' -------------------------------------------------')
     })
-
 
     // Run local server
     if (process.env.NODE_ENV === 'development') {
