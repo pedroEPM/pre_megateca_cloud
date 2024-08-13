@@ -1,8 +1,13 @@
+
+export const removeAccents = (str) => {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}
+
 export const splitedAllWords = (allWords) => {
   try {
     const allWordsSplited = []
     allWords.split(' ').forEach(word => {
-      if (word.trim() !== '' && word.trim().length > 2) allWordsSplited.push(word.trim())
+      if (word.trim() !== '' && word.trim().length > 2) allWordsSplited.push(removeAccents(word.toLowerCase().trim()))
     })
     return allWordsSplited
   } catch (error) {

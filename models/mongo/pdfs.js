@@ -51,6 +51,9 @@ const pdfscSchema = Schema({
     },
     isDeleted: {
         type: Boolean
+    },
+    content: {
+        type: String,
     }
 
 })

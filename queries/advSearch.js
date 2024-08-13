@@ -4,44 +4,44 @@ import { Notebooks_ } from './notebooks.js'
 import { Publciations_ } from './publications.js'
 
 export class AdvSearch_ {
-  constructor () {
+  constructor() {
     this.notebooks_ = new Notebooks_()
     this.publications_ = new Publciations_()
   }
 
-  async find (query) {
+  async find(query) {
     try {
       // const cQuery = {}
       const lastQuery = query.isFirstTime === -1
         ? [
-            {
-              $sort: {
-                customIdReverse: Number(query.sort)
-              }
-            },
-            { $skip: Number(query.skip) },
-            { $limit: Number(query.limit) },
-            {
-              $lookup: {
-                from: 'publications',
-                localField: 'publication',
-                foreignField: '_id',
-                as: 'publication'
-              }
-            },
-            {
-              $lookup: {
-                from: 'notebooks',
-                localField: 'notebook',
-                foreignField: '_id',
-                as: 'notebook'
-              }
+          {
+            $sort: {
+              customIdReverse: Number(query.sort)
             }
-          ] : [
-            {
-              $count: 'totalMatches' // Nombre del campo en el que se almacenará el conteo
+          },
+          { $skip: Number(query.skip) },
+          { $limit: Number(query.limit) },
+          {
+            $lookup: {
+              from: 'publications',
+              localField: 'publication',
+              foreignField: '_id',
+              as: 'publication'
             }
-          ]
+          },
+          {
+            $lookup: {
+              from: 'notebooks',
+              localField: 'notebook',
+              foreignField: '_id',
+              as: 'notebook'
+            }
+          }
+        ] : [
+          {
+            $count: 'totalMatches' // Nombre del campo en el que se almacenará el conteo
+          }
+        ]
 
       if (query.date) {
         lastQuery.unshift({
@@ -54,14 +54,39 @@ export class AdvSearch_ {
         })
       }
 
+      if (query.keywords) {
+        const should = [];
+        query.keywords.forEach(element => {
+          should.push({
+            text: {
+              query: element,
+              path: ['content']
+            }
+          });
+        });
+
+        lastQuery.unshift({
+          $search: {
+            index: 'pdfs',
+            compound: {
+              should: should,
+              minimumShouldMatch: query.keywords.length
+            }
+            
+          }
+        })
+      }
+
+
+      console.log(lastQuery[0].$search.compound.should);
       const allPDFs = await pdfs.aggregate(lastQuery)
 
       return query.isFirstTime === -1
         ? allPDFs.map(element => {
-            element.newSRCPDFThumbnail = element.newSRCPDFThumbnail.replace('/thumbs/pdfs/', '/')
-            element.newSRCPDF = element.newSRCPDF.replace('/pdfs/', '/bigPdf/').replace('.pdf', '_.jpg')
-            return element
-          })
+          element.newSRCPDFThumbnail = element.newSRCPDFThumbnail.replace('/thumbs/pdfs/', '/')
+          element.newSRCPDF = element.newSRCPDF.replace('/pdfs/', '/bigPdf/').replace('.pdf', '_.jpg')
+          return element
+        })
         : allPDFs
     } catch (error) {
       console.log('Error find - queries ', error)
@@ -69,7 +94,7 @@ export class AdvSearch_ {
     }
   }
 
-  async findByNewId (id) {
+  async findByNewId(id) {
     try {
       const pdf = await pdfs.findOne({
         isNewId: id
