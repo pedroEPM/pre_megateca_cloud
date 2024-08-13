@@ -12,37 +12,36 @@ export class AdvSearch_ {
   async find (query) {
     try {
       // const cQuery = {}
-      const lastQuery = query.isFirstTime === -1 ? [
-        // { $match: {}},
-
-        {
-          $sort: {
-            customIdReverse: Number(query.sort)
-          }
-        },
-        { $skip: Number(query.skip) },
-        { $limit: Number(query.limit) },
-        {
-          $lookup: {
-            from: 'publications',
-            localField: 'publication',
-            foreignField: '_id',
-            as: 'publication'
-          }
-        },
-        {
-          $lookup: {
-            from: 'notebooks',
-            localField: 'notebook',
-            foreignField: '_id',
-            as: 'notebook'
-          }
-        }
-      ] : [
-        {
-          $count: 'totalMatches' // Nombre del campo en el que se almacenará el conteo
-        }
-      ]
+      const lastQuery = query.isFirstTime === -1
+        ? [
+            {
+              $sort: {
+                customIdReverse: Number(query.sort)
+              }
+            },
+            { $skip: Number(query.skip) },
+            { $limit: Number(query.limit) },
+            {
+              $lookup: {
+                from: 'publications',
+                localField: 'publication',
+                foreignField: '_id',
+                as: 'publication'
+              }
+            },
+            {
+              $lookup: {
+                from: 'notebooks',
+                localField: 'notebook',
+                foreignField: '_id',
+                as: 'notebook'
+              }
+            }
+          ] : [
+            {
+              $count: 'totalMatches' // Nombre del campo en el que se almacenará el conteo
+            }
+          ]
 
       if (query.date) {
         lastQuery.unshift({
