@@ -77,8 +77,6 @@ export class AdvSearch_ {
         })
       }
 
-
-      console.log(lastQuery[0].$search.compound.should);
       const allPDFs = await pdfs.aggregate(lastQuery)
 
       return query.isFirstTime === -1
